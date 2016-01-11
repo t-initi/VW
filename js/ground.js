@@ -65,9 +65,7 @@ function init () {
 	ground.rotation.x = - Math.PI / 2;
 	ground.receiveShadow = true;
 	scene.add( ground );
-    
 
-    
                 
     // on créé un  cube au quel on définie un matériau puis on l’ajoute à la scène 
     /*var geometry = new THREE.CubeGeometry( 200, 100, 100 );
