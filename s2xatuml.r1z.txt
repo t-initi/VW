@@ -1,0 +1,21 @@
+﻿
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+#
+# Initial commit
+#
+# Changes to be committed:
+#	new file:   cloth.html
+#	new file:   css/style.css
+#	new file:   img/grasslight-big.jpg
+#	new file:   img/grasslight-small.jpg
+#	new file:   index.html
+#	new file:   js/THREEx.KeyboardState.js
+#	new file:   js/ground.js
+#	new file:   js/main.js
+#	new file:   js/three.js
+#	new file:   js/tuto1.js
+#	new file:   js/world1.js
+#
+
