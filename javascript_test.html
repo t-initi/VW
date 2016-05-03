@@ -5,11 +5,10 @@
 	<head>
 		<meta charset='utf-8'>
 		<title>Virtual World</title>
-		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<!--link rel="stylesheet" type="text/css" href="css/style.css"-->
 		<!--script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script-->
 		<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
 		<script type="text/javascript" src="js/three.js"></script>
-		<script type="text/javascript" src="js/vw_tools.js"></script>
 		<script type="text/javascript" src="js/FirstPersonControls.js"></script>
 
 	</head>
@@ -17,15 +16,29 @@
 
 	<body>
 
+		
+		
 
 		<div id='container'>
 
+
+
 		</div>
 	
-		<script type="text/javascript" src="./js/ground.js">
+	<script type="text/javascript" >
+		var container = document.getElementById('contairer');
+		
+			var periods = {
+    			"1" : { name : 'sunny', colorKey : "#ffffff"},
+    			"2" : { name: 'normal', colorKey : "#666666"}
+			};
 
-				
+			console.log(periods["1"].name);
+			
+			
 		</script>
+
+	
 
 	</body>
 
