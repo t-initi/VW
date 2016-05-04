@@ -12,9 +12,10 @@ var mouse3D, isMouseDown = false,
 /** Key codes**/
 var UP=38, DOWN = 40, LEFT= 37, RIGHT = 39;
 var cameraSpeed = 100;
+var presentPeriod;
 
+//CREATE DOM ELEMENTS
 
-//DOM ELEMENTS
 //CONTAINER
 var container = document.getElementById('container');
 //INFO
@@ -39,7 +40,6 @@ $(document).ready(function(){
 
     init();
     //onWindowsResize();
-    //drawTree();
     animate();
     doc.keydown(function(event){
         keyPressed(event);
@@ -49,7 +49,6 @@ $(document).ready(function(){
 
 /** initialize **/
 function init () {
-
 	// body...
     
     // on initialise le moteur de rendu
@@ -264,7 +263,7 @@ function updateInfo(message){
 function animate(){
     var delta = clock.getDelta();
     tick += delta;
-    updateInfo(" Time : <br /> "+tick.toFixed(3)+'Day color : '+ambientLight.color); //Affiche les information
+    updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod); //Affiche les information
     setPeriod();
     // on appel la fonction animate() récursivement à chaque frame
     requestAnimationFrame( animate );
@@ -277,31 +276,15 @@ function render() {
 }
 
 //Mettre à jour le temps
+//30 secs = 1h
+//30 x 24 = 1j
+//1j = 720 seconds
 function setPeriod(){
-    if(tick >= 600 ){ tick = 0; } //reset tick
-    var timePasseUnit = tick / 10; //600 seconds 60secs =1h passée
-   /* if(timePasseUnit > 1){
-        //light.visible = false;
-        ambientLight.color = 0xffffff;
-    }*/
-
-    switch(timePasseUnit.toFixed(0)){
-        case 0 : ambientLight.color = this.periods[0].colorKey;
-            break;
-        case 1 : ambientLight.color = this.periods[1].colorKey;;
-            break;
-        case 2 : ambientLight.color = this.periods[2].colorKey;;
-            break;
-        case 3 : ambientLight.color = this.periods[3].colorKey;;
-            break;
-        case 4 : ambientLight.color = this.periods[4].colorKey;;
-            break;
-        case 5 : ambientLight.color = this.periods[5].colorKey;;
-            break;
-        case 6 : ambientLight.color = this.periods[6].colorKey;;
-            break;
-        default : ambientLight.color = 0xffffff;
-    }
+    if(tick >= 720 ){ tick = 0; } //reset tick
+    presentPeriod = Math.floor(tick / 30);
+    scene.fog.color = this.periods[presentPeriod];
+    //renderer.setClearColor( scene.fog.color );
+ 
 }
 
 //animation des cubes
