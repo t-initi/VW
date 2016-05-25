@@ -1,4 +1,7 @@
 var periods = [
+    0x404040,
+    0xFF4500,
+    
     0xff0000,
     0xffffff,
     0xe6eeff,

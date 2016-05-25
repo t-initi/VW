@@ -12,32 +12,33 @@ var mouse3D, isMouseDown = false,
 /** Key codes**/
 var UP=38, DOWN = 40, LEFT= 37, RIGHT = 39;
 var cameraSpeed = 100;
-var presentPeriod;
+var presentPeriod = 0;
 
-//CREATE DOM ELEMENTS
 
-//CONTAINER
-var container = document.getElementById('container');
-//INFO
-var info = document.createElement( 'div' );
-    info.style.position = 'absolute';
-    info.setAttribute("id","info");
-    info.style.top = '10px';
-    info.style.width = '100%';
-    info.style.textAlign = 'center';
-    info.innerHTML = 'Bienvenue sur Virtual World<br/><span style="font-style: italic;">par Ine Thierry & Hamidou Toure</span>';
-    container.appendChild( info );
-//STATS
+
 
 $(document).ready(function(){
     var doc = $(document);
 	var renderer, scene, camera, mesh, tree, cylinder, controls ;
     var timer = new Date();
-    var tick =0;
+    var tick = 0;
     var clock = new THREE.Clock();
     var ambientLight, light;
-   
+   //CREATE DOM ELEMENTS
 
+    //CONTAINER
+    var container = document.getElementById('container');
+    //INFO
+    var info = document.createElement( 'div' );
+        info.setAttribute("id","infos");
+        info.innerHTML = 'Bienvenue sur Virtual World<br/><span style="font-style: italic;">par Ine Thierry & Hamidou Toure</span>';
+        container.appendChild( info );
+
+    //STATS
+    var statsContainer = document.createElement('div');
+
+
+    //INIT
     init();
     //onWindowsResize();
     animate();
@@ -81,10 +82,10 @@ function init () {
     
     //Lumiere
     var materials;
-    ambientLight = new THREE.AmbientLight( 0xFF4500 );
+    ambientLight = new THREE.AmbientLight( 0xFF0000 );//0x404040
 	scene.add( ambientLight );
 
-	light = new THREE.DirectionalLight( 0xdfebff, 1.1 ); //0xdfebff 1.75
+	light = new THREE.DirectionalLight( 0xff0000, 1.75 ); //0xdfebff 1.75
 	light.position.set( 50, 200, 100 );
 	light.position.multiplyScalar( 1.3 );
 	light.castShadow = true;
@@ -123,6 +124,12 @@ function init () {
      drawForest();
      ambientLight.visible =false;
 
+    //Seperating walls
+    var wallGeometry = new THREE.BoxGeometry( 500, 500, 500 );
+    console.log(wallGeometry);
+    var WallMaterial = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+    var wall = new THREE.Mesh( wallGeometry, WallMaterial);
+    scene.add( wall );
 
     //Terrain 2
 
@@ -256,14 +263,14 @@ function changeSkyColor(){
 
 //Affiche un message
 function updateInfo(message){
-    info.innerHTML = 'Bienvenue sur Virtual World<br/><span style="font-style: italic;">par Ine Thierry & Hamidou Toure</span>';
-    $("#info").html(message);
+    //info.innerHTML = 'Bienvenue sur Virtual World<br/><span style="font-style: italic;">par Ine Thierry & Hamidou Toure</span>';
+    $("#infos").html(message);
 }
 
 function animate(){
     var delta = clock.getDelta();
     tick += delta;
-    updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod); //Affiche les information
+    updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod +' periodColor: '+ this.periods[presentPeriod]+'camera position '+camera.position.x+' '+camera.position.y+' '+camera.position.z); //Affiche les information
     setPeriod();
     // on appel la fonction animate() récursivement à chaque frame
     requestAnimationFrame( animate );
@@ -282,7 +289,7 @@ function render() {
 function setPeriod(){
     if(tick >= 720 ){ tick = 0; } //reset tick
     presentPeriod = Math.floor(tick / 30);
-    scene.fog.color = this.periods[presentPeriod];
+    //scene.fog.color = this.periods[presentPeriod];
     //renderer.setClearColor( scene.fog.color );
  
 }
