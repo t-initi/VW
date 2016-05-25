@@ -85,8 +85,8 @@ function init () {
     ambientLight = new THREE.AmbientLight( 0xFF0000 );//0x404040
 	scene.add( ambientLight );
 
-	light = new THREE.DirectionalLight( 0xff0000, 1.75 ); //0xdfebff 1.75
-	light.position.set( 50, 200, 100 );
+	light = new THREE.DirectionalLight( 0xdfebff, 1.75 ); //0xdfebff 1.75
+	light.position.set( 50, 00, 100 );
 	light.position.multiplyScalar( 1.3 );
 	light.castShadow = true;
 	light.shadowCameraVisible = true;
@@ -104,7 +104,6 @@ function init () {
 
 	light.shadowCameraFar = 1000;
 
-    //console.log(light);
 	scene.add( light );
     
     //Terrain 1
@@ -112,7 +111,7 @@ function init () {
 	groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
 	groundTexture.repeat.set( 25, 25 );
 	groundTexture.anisotropy = 16;
-							//
+	
 	var groundMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: groundTexture} );
 	ground = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20000, 20000 ), groundMaterial );
 	//ground.position.y = -250;
@@ -120,15 +119,14 @@ function init () {
 	ground.rotation.x = - Math.PI / 2;
 	ground.receiveShadow = true;
 	scene.add( ground );
-     //drawTree();
      drawForest();
      ambientLight.visible =false;
 
     //Seperating walls
     var wallGeometry = new THREE.BoxGeometry( 500, 500, 500 );
-    console.log(wallGeometry);
-    var WallMaterial = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+    var WallMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000, map: groundTexture} );
     var wall = new THREE.Mesh( wallGeometry, WallMaterial);
+    wall.position.set(0, 300, 11100);
     scene.add( wall );
 
     //Terrain 2
@@ -150,6 +148,8 @@ function init () {
 
     //draw walls
 
+    camera.position.set(0,300,31000);
+
 }
 
 
@@ -169,7 +169,6 @@ function drawTree(){
     var sphere = new THREE.Mesh( geometry, material );
     scene.add( sphere );
     sphere.position.y=375;
-    //sphere.position.z= 100;
 
 }
 
@@ -231,7 +230,7 @@ function Document_OnMouseDown(event) {
 */
 function keyPressed(event){
     //alert(event.keyCode);
-
+    event.preventDefault();
     var keycode = event.keyCode || event.which;
     //alert(keycode);
     switch(keycode){
@@ -274,7 +273,6 @@ function animate(){
     setPeriod();
     // on appel la fonction animate() récursivement à chaque frame
     requestAnimationFrame( animate );
-    // on effectue le rendu de la scène
     render();
 }
 
@@ -288,9 +286,10 @@ function render() {
 //1j = 720 seconds
 function setPeriod(){
     if(tick >= 720 ){ tick = 0; } //reset tick
-    presentPeriod = Math.floor(tick / 30);
+    presentPeriod = Math.floor(tick / 10);
     //scene.fog.color = this.periods[presentPeriod];
     //renderer.setClearColor( scene.fog.color );
+    //light.color = this.periods[presentPeriod];
  
 }
 
