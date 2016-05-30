@@ -19,7 +19,7 @@ var presentPeriod = 0;
 
 $(document).ready(function(){
     var doc = $(document);
-	var renderer, scene, camera, mesh, tree, cylinder, controls ;
+	var renderer, scene, camera, mesh, tree, cylinder, waterGeometry, waterMesh, controls ;
     var timer = new Date();
     var tick = 0;
     var clock = new THREE.Clock();
@@ -40,23 +40,23 @@ $(document).ready(function(){
 
     //INIT
     init();
-    //onWindowsResize();
-    animate();
     doc.keydown(function(event){
         keyPressed(event);
         
     });
+    //onWindowsResize();
+    animate();
+    
 
 
 /** initialize **/
 function init () {
-	// body...
     
     // on initialise le moteur de rendu
     renderer = new THREE.WebGLRenderer();
     // on initialise la scène
-    scene = new THREE.Scene();	//0xcce0ff
-    scene.fog = new THREE.Fog( 0xcce0ff, 500, 10000 );
+    scene = new THREE.Scene();	
+    scene.fog = new THREE.Fog( 0xcce0ff, 500, 10000 ); //0xffe53d ff0000 cce0ff
     
     // renderer = new THREE.CanvasRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -82,10 +82,10 @@ function init () {
     
     //Lumiere
     var materials;
-    ambientLight = new THREE.AmbientLight( 0xFF0000 );//0x404040
+    ambientLight = new THREE.AmbientLight( 0x666666 );//0x404040 0x666666 
 	scene.add( ambientLight );
 
-	light = new THREE.DirectionalLight( 0xdfebff, 1.75 ); //0xdfebff 1.75
+	light = new THREE.DirectionalLight( 0xdfebff, 1.75 ); //0xdfebff 1.75 0xdfebff
 	light.position.set( 50, 00, 100 );
 	light.position.multiplyScalar( 1.3 );
 	light.castShadow = true;
@@ -120,7 +120,7 @@ function init () {
 	ground.receiveShadow = true;
 	scene.add( ground );
      drawForest();
-     ambientLight.visible =false;
+     ambientLight.visible =true;
 
     //Seperating walls
     var wallGeometry = new THREE.BoxGeometry( 500, 500, 500 );
@@ -138,9 +138,7 @@ function init () {
                             //
     var groundMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: groundTexture2} );
     ground2 = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20000, 20000 ), groundMaterial );
-    //ground2.position.y = -250;
     ground2.position.set(0,0,20050);
-    //ground2.position.x = 2000;
     ground2.rotation.x = - Math.PI / 2;
     ground2.receiveShadow = true;
     scene.add( ground2 );
@@ -148,7 +146,51 @@ function init () {
 
     //draw walls
 
-    camera.position.set(0,300,31000);
+   // camera.position.set(0,300,31000);
+   //Water
+   waterGeometry = new THREE.PlaneBufferGeometry(20000, 20000);
+   waterGeometry.rotateX( - Math.PI / 2);
+   var vertices = waterGeometry.attributes.position.array;
+   for ( var i = 0, l = vertices.length; i < l; i ++ ) {
+        vertices[ i ].y = 35 * Math.sin( i / 2 );
+     }
+     var waterTexture = THREE.ImageUtils.loadTexture( "./js/textures/waternormals.jpg" );
+    waterTexture.wrapS = waterTexture.wrapT = THREE.RepeatWrapping;
+    waterTexture.repeat.set( 5, 5 );
+    waterMaterial = new THREE.MeshBasicMaterial( { color: 0x0044ff, map: waterTexture} );
+    waterMesh = new THREE.Mesh( waterGeometry, waterMaterial );
+    waterMesh.position.set(0,0,-20000);
+    scene.add( waterMesh );
+
+     //Brick Terrain 1
+
+    var brickTexture1 = THREE.ImageUtils.loadTexture( "./js/textures/brick_diffuse.jpg" );
+    brickTexture1.wrapS = brickTexture1.wrapT = THREE.RepeatWrapping;
+    brickTexture1.repeat.set( 25, 25 );
+    brickTexture1.anisotropy = 16;
+                            //
+    var brickMat1 = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: brickTexture1} );
+    brick1 = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20000, 20000 ), brickMat1 );
+    brick1.position.set(0,0, -40000);
+    brick1.rotation.x = - Math.PI / 2;
+    brick1.receiveShadow = true;
+    scene.add( brick1 );
+
+     //Brick Terrain 2
+
+    var brickTexture2 = THREE.ImageUtils.loadTexture( "./js/textures/brick_bump.jpg" );
+    brickTexture2.wrapS = brickTexture1.wrapT = THREE.RepeatWrapping;
+    brickTexture2.repeat.set( 5, 1 );
+    brickTexture2.anisotropy = 16;
+                            //
+    var brickMat2 = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: brickTexture2} );
+    brick2 = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20000, 20000 ), brickMat2 );
+    brick2.position.set(0,0, -60000);
+    //brick2.rotation.x = - Math.PI / 2;
+    brick2.receiveShadow = true;
+    scene.add( brick2 );
+    console.log(camera);
+
 
 }
 
@@ -182,8 +224,8 @@ function drawForest(){
     var material = new THREE.MeshBasicMaterial( {  color:0x009900} );
     
 
-    for(intervalZ =0 ; intervalZ < 450 * 9; intervalZ+=450){
-        for(var i =0;i<9; i++){
+    for(intervalZ =-9 ; intervalZ < 450 * 20; intervalZ+=450){
+        for(var i =-9;i<9; i++){
             cylinder = new THREE.Mesh( cylGeom, cylMaterial );
             cylinder.position.x = i * intervalX;
             cylinder.position.z = intervalZ;
@@ -269,6 +311,12 @@ function updateInfo(message){
 function animate(){
     var delta = clock.getDelta();
     tick += delta;
+    time = clock.getElapsedTime() * 10;
+    var vertices = waterGeometry.attributes.position.array;
+    for ( var i = 0, l = vertices.length; i < l; i ++ ) {
+        vertices[ i ].y = 35 * Math.sin( i / 5 + ( time + i ) / 7 );
+     }
+     waterMesh.geometry.verticesNeedUpdate = true
     updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod +' periodColor: '+ this.periods[presentPeriod]+'camera position '+camera.position.x+' '+camera.position.y+' '+camera.position.z); //Affiche les information
     setPeriod();
     // on appel la fonction animate() récursivement à chaque frame
