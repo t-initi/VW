@@ -14,9 +14,7 @@ var UP=38, DOWN = 40, LEFT= 37, RIGHT = 39;
 var cameraSpeed = 100;
 var presentPeriod = 0;
 
-
-
-
+//MAIN
 $(document).ready(function(){
     var doc = $(document);
 	var renderer, scene, camera, mesh, tree, cylinder, waterGeometry, waterMesh, controls ;
@@ -24,8 +22,7 @@ $(document).ready(function(){
     var tick = 0;
     var clock = new THREE.Clock();
     var ambientLight, light;
-   //CREATE DOM ELEMENTS
-
+//CREATE DOM ELEMENTS
     //CONTAINER
     var container = document.getElementById('container');
     //INFO
@@ -36,19 +33,12 @@ $(document).ready(function(){
 
     //STATS
     var statsContainer = document.createElement('div');
-
-
     //INIT
     init();
-    doc.keydown(function(event){
-        keyPressed(event);
-        
-    });
+    doc.keydown(function(event){ keyPressed(event); });
     //onWindowsResize();
     animate();
     
-
-
 /** initialize **/
 function init () {
     
@@ -56,7 +46,7 @@ function init () {
     renderer = new THREE.WebGLRenderer();
     // on initialise la scène
     scene = new THREE.Scene();	
-    scene.fog = new THREE.Fog( 0xcce0ff, 500, 10000 ); //0xffe53d ff0000 cce0ff
+    scene.fog = new THREE.Fog( 0xcce0ff, 500, 10000 ); // 10000, 40000 
     
     // renderer = new THREE.CanvasRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -119,8 +109,10 @@ function init () {
 	ground.rotation.x = - Math.PI / 2;
 	ground.receiveShadow = true;
 	scene.add( ground );
-     drawForest();
-     ambientLight.visible =true;
+    ambientLight.visible =true;
+    drawForest(2, -9);
+    drawForest(-11, -9);
+   
 
     //Seperating walls
     var wallGeometry = new THREE.BoxGeometry( 500, 500, 500 );
@@ -150,6 +142,7 @@ function init () {
    //Water
    waterGeometry = new THREE.PlaneBufferGeometry(20000, 20000);
    waterGeometry.rotateX( - Math.PI / 2);
+
    var vertices = waterGeometry.attributes.position.array;
    for ( var i = 0, l = vertices.length; i < l; i ++ ) {
         vertices[ i ].y = 35 * Math.sin( i / 2 );
@@ -189,32 +182,11 @@ function init () {
     //brick2.rotation.x = - Math.PI / 2;
     brick2.receiveShadow = true;
     scene.add( brick2 );
-    console.log(camera);
 
-
+     camera.position.z = 30000;
 }
 
-
-function drawTree(){
-    var cylGeom = new THREE.CylinderGeometry(40, 50, 700, 20);
-    var cylMaterial = new THREE.MeshBasicMaterial( {color: 0x1a0d00} );
-    cylinder = new THREE.Mesh( cylGeom, cylMaterial );
-    scene.add( cylinder );
-    
-    //Feuilles de l'arbre
-    var treeLeaves = THREE.ImageUtils.loadTexture('./img/tree1.png');
-    treeLeaves.wrapS = treeLeaves.wrapT = THREE.RepeatWrapping
-
-    var geometry = new THREE.SphereGeometry( 200, 8, 6 );
-    var material = new THREE.MeshBasicMaterial( {  color:0x009900} );
-    
-    var sphere = new THREE.Mesh( geometry, material );
-    scene.add( sphere );
-    sphere.position.y=375;
-
-}
-
-function drawForest(){
+function drawForest(initX, initZ){
     var intervalX = 550;
     var intervalZ = 0;
     var cylGeom = new THREE.CylinderGeometry(40, 50, 700, 20);
@@ -224,8 +196,8 @@ function drawForest(){
     var material = new THREE.MeshBasicMaterial( {  color:0x009900} );
     
 
-    for(intervalZ =-9 ; intervalZ < 450 * 20; intervalZ+=450){
-        for(var i =-9;i<9; i++){
+    for(intervalZ =initZ ; intervalZ < 450 * 5; intervalZ+=450){
+        for(var i =initX; i< initX + 9; i++){
             cylinder = new THREE.Mesh( cylGeom, cylMaterial );
             cylinder.position.x = i * intervalX;
             cylinder.position.z = intervalZ;
@@ -241,8 +213,6 @@ function drawForest(){
     }
 
 }
-
-
 
 function Document_OnMouseDown(event) {
     event.preventDefault();
@@ -291,16 +261,8 @@ function keyPressed(event){
     }
 }
 
-/**
-*   Menu du jeu
-*/
 
-/**
-* Change la couleur du ciel en fonction du temps
-**/
-function changeSkyColor(){
-
-}
+/***  MENU  ***/
 
 //Affiche un message
 function updateInfo(message){
@@ -311,12 +273,8 @@ function updateInfo(message){
 function animate(){
     var delta = clock.getDelta();
     tick += delta;
-    time = clock.getElapsedTime() * 10;
-    var vertices = waterGeometry.attributes.position.array;
-    for ( var i = 0, l = vertices.length; i < l; i ++ ) {
-        vertices[ i ].y = 35 * Math.sin( i / 5 + ( time + i ) / 7 );
-     }
-     waterMesh.geometry.verticesNeedUpdate = true
+    if( camera.position.z > -48000) camera.position.z -= 20;
+    
     updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod +' periodColor: '+ this.periods[presentPeriod]+'camera position '+camera.position.x+' '+camera.position.y+' '+camera.position.z); //Affiche les information
     setPeriod();
     // on appel la fonction animate() récursivement à chaque frame
@@ -338,59 +296,22 @@ function setPeriod(){
     //scene.fog.color = this.periods[presentPeriod];
     //renderer.setClearColor( scene.fog.color );
     //light.color = this.periods[presentPeriod];
- 
 }
 
-//animation des cubes
-function animateCubes(){
-    /*cube.rotation.x += 0.01;
-    cube.rotation.y += 0.009;
-    cube.rotation.z += 0.009;*/
 
-}
 function animateGround(){
     ground.rotation.x += 0.009;
     ground.rotation.y += 0.002;
     ground.rotation.z += 0.009;
-
 }
 
 function onWindowsResize(e){
      camera.aspect = window.innerWidth / window.innerHeight;
      camera.updateProjectionMatrix();
-
      renderer.setSize(window.innerWidth , window.innerHeight);
      controls.handleResize();
 }
 
-/**
-* Mouvement de la souris
-**/
-
-/*
-function onDocumentMouseMove(event){
-        isMouseDown = true;
-    event.preventDefault();
-    if(isMouseDown){
-        //theta = - ((event.clientX - onMouseDownPosition.x) * 0.5) + onMouseDownTheta;
-        //phi = ((event.clientY - onMouseDownPosition.y) * 0.5) + onMouseDownPhi;
-
-        phi = Math.min(180, Math.max(0,phi));
-
-        camera.position.x = radious * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI /360);
-        camera.position.y = radious * Math.sin(phi * Math.PI /360);
-        camera.position.z = radious * Math.cos(theta* Math.PI /360) * Math.cos(phi * Math.PI / 360);
-        camera.updateMatrix();
-    }
-
-    mouse3D = projector.unprojectVector(new THREE.Vector3((event.clientX / renderer.domElement.width) * 2 - 1,
-     - (event.clientY / renderer.domElement.height) * 2+1, 0.5), camera);
-    ray.direction = mouse3D.subSelf(camera.position).normalize();
-    interact();
-    render();
-
-}
-*/
 /**
 * TO DO
 * Eau, desert , arbres

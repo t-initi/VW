@@ -1,5 +1,10 @@
 var periods = [
+//MORNING
+    0xcce0ff,
+    0xb8dfff,
+    0xf9fe62,
 
+//EVENING
     0x004de6,
     0x0044cc,
     0x003cb3,
