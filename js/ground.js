@@ -2,6 +2,9 @@
 var statsDiv;
 /// Rotation
 var mouse3D, isMouseDown = false,
+    upPressed = false,
+    downPressed = false,
+
     onMouseDownPosition, radious = 1600,
     theta = 90,
     onMouseDownTheta = 45,
@@ -10,7 +13,7 @@ var mouse3D, isMouseDown = false,
     isShiftDown = false;
 
 /** Key codes**/
-var UP=38, DOWN = 40, LEFT= 37, RIGHT = 39;
+var UP=38, DOWN = 40, LEFT= 37, RIGHT = 39, STOP = 32;
 var cameraSpeed = 100;
 var presentPeriod = 0;
 
@@ -127,7 +130,7 @@ function init () {
     groundTexture2.wrapS = groundTexture2.wrapT = THREE.RepeatWrapping;
     groundTexture2.repeat.set( 25, 25 );
     groundTexture2.anisotropy = 16;
-                            //
+                            
     var groundMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: groundTexture2} );
     ground2 = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20000, 20000 ), groundMaterial );
     ground2.position.set(0,0,20050);
@@ -155,13 +158,13 @@ function init () {
     waterMesh.position.set(0,0,-20000);
     scene.add( waterMesh );
 
-     //Brick Terrain 1
+//Brick Terrain 1
 
     var brickTexture1 = THREE.ImageUtils.loadTexture( "./js/textures/brick_diffuse.jpg" );
     brickTexture1.wrapS = brickTexture1.wrapT = THREE.RepeatWrapping;
     brickTexture1.repeat.set( 25, 25 );
     brickTexture1.anisotropy = 16;
-                            //
+                            
     var brickMat1 = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: brickTexture1} );
     brick1 = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20000, 20000 ), brickMat1 );
     brick1.position.set(0,0, -40000);
@@ -169,17 +172,17 @@ function init () {
     brick1.receiveShadow = true;
     scene.add( brick1 );
 
-     //Brick Terrain 2
+//Brick Terrain 2
 
     var brickTexture2 = THREE.ImageUtils.loadTexture( "./js/textures/brick_bump.jpg" );
-    brickTexture2.wrapS = brickTexture1.wrapT = THREE.RepeatWrapping;
-    brickTexture2.repeat.set( 5, 1 );
+    brickTexture2.wrapS = brickTexture2.wrapT = THREE.RepeatWrapping;
+    brickTexture2.repeat.set( 25, 25 );
     brickTexture2.anisotropy = 16;
-                            //
+                            
     var brickMat2 = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: brickTexture2} );
     brick2 = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20000, 20000 ), brickMat2 );
     brick2.position.set(0,0, -60000);
-    //brick2.rotation.x = - Math.PI / 2;
+    brick2.rotation.x = - Math.PI / 2;
     brick2.receiveShadow = true;
     scene.add( brick2 );
 
@@ -195,7 +198,6 @@ function drawForest(initX, initZ){
     var geometry = new THREE.SphereGeometry( 200, 8, 6 );
     var material = new THREE.MeshBasicMaterial( {  color:0x009900} );
     
-
     for(intervalZ =initZ ; intervalZ < 450 * 5; intervalZ+=450){
         for(var i =initX; i< initX + 9; i++){
             cylinder = new THREE.Mesh( cylGeom, cylMaterial );
@@ -208,10 +210,8 @@ function drawForest(initX, initZ){
             sphere.position.z = intervalZ;
             sphere.position.y=380;
             scene.add( sphere );
-
         }
     }
-
 }
 
 function Document_OnMouseDown(event) {
@@ -222,42 +222,46 @@ function Document_OnMouseDown(event) {
     //onMouseDownPosition.y = event.clientY;
 }
 
-   function moveCamera(event){
-        event.preventDefault();
-         camera.position.x += 0.9;
-    }
+function moveCamera(event){
+    event.preventDefault();
+     camera.position.x += 0.9;
+}
 
-    function mouseRotateCamera(event){
-        event.preventDefault();
-        doc.mousedown(function(){
-            phi = 1;
-            theta = 10;
-             $("#info").text("Valeur de Phi = "+phi+" Valeur de Theta ="+ theta);
-        });
-    }
-
-
+function mouseRotateCamera(event){
+    event.preventDefault();
+    doc.mousedown(function(){
+        phi = 1;
+        theta = 10;
+         $("#infos").text("Valeur de Phi = "+phi+" Valeur de Theta ="+ theta);
+    });
+}
 /**
 * Gère la déplacement (avant et arrière) de l'utilisateur
 */
 function keyPressed(event){
-    //alert(event.keyCode);
     event.preventDefault();
     var keycode = event.keyCode || event.which;
-    //alert(keycode);
     switch(keycode){
         case UP:
-            camera.position.z -= cameraSpeed
+            camera.position.z -= cameraSpeed;
+            upPressed = true;
+            downPressed = false;
             break;
         case DOWN:
             camera.position.z += cameraSpeed;
+            upPressed = false;
+            downPressed = true;
         break;
         case RIGHT:
-            camera.rotation.y -= 0.01;
+            camera.rotation.y -= 0.05;
             break;
         case LEFT:
-            camera.rotation.y += 0.01;
+            camera.rotation.y += 0.05;
         break;
+        case STOP:
+            upPressed = false;
+            downPressed = false;
+            break;
     }
 }
 
@@ -273,11 +277,18 @@ function updateInfo(message){
 function animate(){
     var delta = clock.getDelta();
     tick += delta;
-    if( camera.position.z > -48000) camera.position.z -= 20;
+    if( camera.position.z > -48000 && upPressed) {
+        if (camera.rotation.y != 0) camera.rotation.y = 0;
+        camera.position.z -= 20;
+    }
+    if( camera.position.z < 30000 && downPressed) {
+        if (camera.rotation.y != -3.30) camera.rotation.y = -3.30;
+        camera.position.z += 20;
+    }
+    //updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod +' periodColor: '+ this.periods[presentPeriod]+'camera position '+camera.position.x+' '+camera.position.y+' '+camera.position.z+ ' rotation '+camera.rotation.y ); //Affiche les information
+    updateInfo(" Time : <br /> "+tick.toFixed(1)+' presentPeriod : '+presentPeriod +' <br />periodColor: '+ this.periods[presentPeriod]); //Affiche les information
     
-    updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod +' periodColor: '+ this.periods[presentPeriod]+'camera position '+camera.position.x+' '+camera.position.y+' '+camera.position.z); //Affiche les information
     setPeriod();
-    // on appel la fonction animate() récursivement à chaque frame
     requestAnimationFrame( animate );
     render();
 }
@@ -286,10 +297,6 @@ function render() {
     renderer.render( scene, camera );
 }
 
-//Mettre à jour le temps
-//30 secs = 1h
-//30 x 24 = 1j
-//1j = 720 seconds
 function setPeriod(){
     if(tick >= 720 ){ tick = 0; } //reset tick
     presentPeriod = Math.floor(tick / 10);
@@ -311,14 +318,4 @@ function onWindowsResize(e){
      renderer.setSize(window.innerWidth , window.innerHeight);
      controls.handleResize();
 }
-
-/**
-* TO DO
-* Eau, desert , arbres
-* Agrandir le terrain
-* Implementer la souris
-**/
-
-
-
 });
