@@ -1,3 +1,19 @@
+var ambientLightColors = [
+//PERIOD
+    0xcce0ff, // 1/4
+    0xb8dfff, // 2/4
+    0xf9fe62, // 3/4
+    0xf7ba02, // 4/4
+    0xc72c05, //5
+    0x940606, //6
+    0x999999, //7
+    0x777777, //8
+    0x666666, //9
+    0x372f2f, //10
+    0x2a1818, //11
+    0x292323
+];
+
 var periods = [
 //MORNING
     0xcce0ff,
@@ -47,4 +63,5 @@ var parameters = {
 	timeInterval : 600
 };
 
-this.periods = periods;
+this.periods            = periods;
+this.ambientLightColors = ambientLightColors;

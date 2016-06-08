@@ -26,6 +26,8 @@ body{
 	top : 1em;
 	width : 100%;
 	text-align: center;
-	background-color: white;
+	background-color: none;
+	font-weight: bolder;
+	color : blue;
 
 }

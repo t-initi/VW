@@ -16,37 +16,42 @@ var mouse3D, isMouseDown = false,
 var UP=38, DOWN = 40, LEFT= 37, RIGHT = 39, STOP = 32;
 var cameraSpeed = 100;
 var presentPeriod = 0;
+var ambientLightInterval = 60;
 
 //MAIN
 $(document).ready(function(){
     var doc = $(document);
-	var renderer, scene, camera, mesh, tree, cylinder, waterGeometry, waterMesh, controls ;
+	var renderer, scene, camera, mesh,cylinder, waterGeometry, waterMesh, controls, wall, effect;
     var timer = new Date();
     var tick = 0;
     var clock = new THREE.Clock();
     var ambientLight, light;
+    var spheres = [];
+
 //CREATE DOM ELEMENTS
-    //CONTAINER
+    
+//CONTAINER
     var container = document.getElementById('container');
-    //INFO
+//INFO
     var info = document.createElement( 'div' );
         info.setAttribute("id","infos");
         info.innerHTML = 'Bienvenue sur Virtual World<br/><span style="font-style: italic;">par Ine Thierry & Hamidou Toure</span>';
         container.appendChild( info );
 
-    //STATS
+//STATS
     var statsContainer = document.createElement('div');
-    //INIT
+
+//INIT
     init();
     doc.keydown(function(event){ keyPressed(event); });
     //onWindowsResize();
     animate();
     
-/** initialize **/
+/*** Initialize ***/
 function init () {
-    
     // on initialise le moteur de rendu
     renderer = new THREE.WebGLRenderer();
+    
     // on initialise la scène
     scene = new THREE.Scene();	
     scene.fog = new THREE.Fog( 0xcce0ff, 500, 10000 ); // 10000, 40000 
@@ -57,7 +62,7 @@ function init () {
     container.appendChild(renderer.domElement);
 
     // on initialise la camera que l’on place ensuite sur la scène
-    camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 10000 );
+    camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 100000 );
 
     camera.position.y = 300;
     camera.position.z=1500;
@@ -75,7 +80,7 @@ function init () {
     
     //Lumiere
     var materials;
-    ambientLight = new THREE.AmbientLight( 0x666666 );//0x404040 0x666666 
+    ambientLight = new THREE.AmbientLight( 0x666666 );//0x404040  
 	scene.add( ambientLight );
 
 	light = new THREE.DirectionalLight( 0xdfebff, 1.75 ); //0xdfebff 1.75 0xdfebff
@@ -107,7 +112,6 @@ function init () {
 	
 	var groundMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: groundTexture} );
 	ground = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20000, 20000 ), groundMaterial );
-	//ground.position.y = -250;
     ground.position.set(0,0,0);
 	ground.rotation.x = - Math.PI / 2;
 	ground.receiveShadow = true;
@@ -120,12 +124,12 @@ function init () {
     //Seperating walls
     var wallGeometry = new THREE.BoxGeometry( 500, 500, 500 );
     var WallMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000, map: groundTexture} );
-    var wall = new THREE.Mesh( wallGeometry, WallMaterial);
+    wall = new THREE.Mesh( wallGeometry, WallMaterial);
     wall.position.set(0, 300, 11100);
+    wall.rotation.x = - Math.PI / 2;
     scene.add( wall );
 
     //Terrain 2
-
     var groundTexture2 = THREE.ImageUtils.loadTexture( "./img/desert.jpg" );
     groundTexture2.wrapS = groundTexture2.wrapT = THREE.RepeatWrapping;
     groundTexture2.repeat.set( 25, 25 );
@@ -137,11 +141,8 @@ function init () {
     ground2.rotation.x = - Math.PI / 2;
     ground2.receiveShadow = true;
     scene.add( ground2 );
-    
-
     //draw walls
 
-   // camera.position.set(0,300,31000);
    //Water
    waterGeometry = new THREE.PlaneBufferGeometry(20000, 20000);
    waterGeometry.rotateX( - Math.PI / 2);
@@ -185,6 +186,28 @@ function init () {
     brick2.rotation.x = - Math.PI / 2;
     brick2.receiveShadow = true;
     scene.add( brick2 );
+    ///
+    var bubbleGeometry = new THREE.SphereBufferGeometry( 100, 32, 16 );
+    var path = "./js/textures/cubes/";
+    var format = '.png';
+    var urls = [
+        path + 'px' + format, path + 'nx' + format,
+        path + 'py' + format, path + 'ny' + format,
+        path + 'pz' + format, path + 'nz' + format
+    ];
+    var textureCube = new THREE.CubeTextureLoader().load( urls );
+    var bubbleMat = new THREE.MeshBasicMaterial( { color: 0xffffff, envMap: textureCube } );
+    for ( var i = 0; i < 500; i ++ ) {
+        var bubbleMesh = new THREE.Mesh( bubbleGeometry, bubbleMat );
+        bubbleMesh.position.x = Math.random() * 10000 - 5000;
+        bubbleMesh.position.y = Math.random() * 10000 - 5000;
+        //bubbleMesh.position.z = Math.random() * 10000 - 5000;
+        bubbleMesh.position.z = Math.random() * -52000;
+        bubbleMesh.scale.x = bubbleMesh.scale.y = bubbleMesh.scale.z = Math.random() * 3 + 1;
+        scene.add( bubbleMesh );
+        spheres.push( bubbleMesh );
+    }
+
 
      camera.position.z = 30000;
 }
@@ -275,6 +298,11 @@ function updateInfo(message){
 }
 
 function animate(){
+    requestAnimationFrame( animate );
+    render();
+}
+
+function render() {
     var delta = clock.getDelta();
     tick += delta;
     if( camera.position.z > -48000 && upPressed) {
@@ -282,34 +310,53 @@ function animate(){
         camera.position.z -= 20;
     }
     if( camera.position.z < 30000 && downPressed) {
-        if (camera.rotation.y != -3.30) camera.rotation.y = -3.30;
+        if (camera.rotation.y != -3.30) camera.rotation.y = -3.1;
         camera.position.z += 20;
     }
-    //updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod +' periodColor: '+ this.periods[presentPeriod]+'camera position '+camera.position.x+' '+camera.position.y+' '+camera.position.z+ ' rotation '+camera.rotation.y ); //Affiche les information
-    updateInfo(" Time : <br /> "+tick.toFixed(1)+' presentPeriod : '+presentPeriod +' <br />periodColor: '+ this.periods[presentPeriod]); //Affiche les information
-    
-    setPeriod();
-    requestAnimationFrame( animate );
-    render();
-}
+    updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod +' periodColor: '+ this.periods[presentPeriod]+'camera position: '+camera.position.x+','+camera.position.y+' ,'+camera.position.z+ ' rotation '+camera.rotation.y ); //Affiche les information
+    //updateInfo(" Time : <br /> "+tick.toFixed(1)+' presentPeriod : '+presentPeriod +' <br />periodColor: '+ this.periods[presentPeriod]); //Affiche les information
+    var timer = 0.0001 * Date.now();
+                //camera.position.x += (  camera.position.x ) * .05;
+                //camera.position.y += (  camera.position.y ) * .05;
+                //camera.lookAt( scene.position );
+                for ( var i = 0, il = spheres.length; i < il; i ++ ) {
+                    var sphere = spheres[ i ];
+                    sphere.position.x = 5000 * Math.cos( timer + i );
+                    sphere.position.y = 5000 * Math.sin( timer + i * 1.1 );
+                }
+                
 
-function render() {
+
+
+
+
+    setPeriod();
+    animateGround();
     renderer.render( scene, camera );
 }
 
 function setPeriod(){
     if(tick >= 720 ){ tick = 0; } //reset tick
     presentPeriod = Math.floor(tick / 10);
-    //scene.fog.color = this.periods[presentPeriod];
-    //renderer.setClearColor( scene.fog.color );
-    //light.color = this.periods[presentPeriod];
+    setAmbientLight();
+    
+    scene.fog.color = new THREE.Color(this.periods[presentPeriod]);
+    renderer.setClearColor( scene.fog.color );
+    //light.color = new THREE.Color(this.periods[presentPeriod]);
+    return;
+}
+
+function setAmbientLight(){
+    var ambientLightPeriod = Math.floor(tick /  ambientLightInterval); //A period = 60
+    ambientLight.color= new THREE.Color(this.ambientLightColors[ambientLightPeriod]);
+    return;
 }
 
 
 function animateGround(){
-    ground.rotation.x += 0.009;
-    ground.rotation.y += 0.002;
-    ground.rotation.z += 0.009;
+    wall.rotation.x += 0.009;
+    wall.rotation.y += 0.002;
+    wall.rotation.z += 0.009;
 }
 
 function onWindowsResize(e){
