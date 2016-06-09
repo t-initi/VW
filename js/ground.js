@@ -27,6 +27,7 @@ $(document).ready(function(){
     var clock = new THREE.Clock();
     var ambientLight, light;
     var spheres = [];
+    var cubes = [];
 
 //CREATE DOM ELEMENTS
     
@@ -125,7 +126,7 @@ function init () {
     var wallGeometry = new THREE.BoxGeometry( 500, 500, 500 );
     var WallMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000, map: groundTexture} );
     wall = new THREE.Mesh( wallGeometry, WallMaterial);
-    wall.position.set(0, 300, 11100);
+    wall.position.set(0, 400, -2900);
     wall.rotation.x = - Math.PI / 2;
     scene.add( wall );
 
@@ -137,11 +138,10 @@ function init () {
                             
     var groundMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: groundTexture2} );
     ground2 = new THREE.Mesh( new THREE.PlaneBufferGeometry( 20000, 20000 ), groundMaterial );
-    ground2.position.set(0,0,20050);
+    ground2.position.set(0, 0, 20050);
     ground2.rotation.x = - Math.PI / 2;
     ground2.receiveShadow = true;
     scene.add( ground2 );
-    //draw walls
 
    //Water
    waterGeometry = new THREE.PlaneBufferGeometry(20000, 20000);
@@ -207,9 +207,32 @@ function init () {
         scene.add( bubbleMesh );
         spheres.push( bubbleMesh );
     }
+    drawWalls(10, 400, -32200);
+    drawWalls(2000, 400, 25000);
+    drawWalls(-2000, 400, 25000);
+   
+    drawWalls(2000, 400, 16000, this.cubeTextures[2]);
+    drawWalls(-2000, 400, 16000, this.cubeTextures[2]);
 
+    drawWalls(2000, 400, -38000, this.cubeTextures[2]);
+    drawWalls(-2000, 400, -38000, this.cubeTextures[2]);
+    
 
-     camera.position.z = 30000;
+    drawWalls(2000, 400, -50000, this.cubeTextures[0]);
+    drawWalls(-2000, 400, -50000, this.cubeTextures[0]);
+
+    drawWalls(2000, 400, -52000, this.cubeTextures[5]);
+    drawWalls(-2000, 400, -52000, this.cubeTextures[5]);
+
+    drawWalls(2000, 400, -55000, this.cubeTextures[5]);
+    drawWalls(-2000, 400, -55000, this.cubeTextures[5]);
+
+    drawWalls(2000, 400, -60000, this.cubeTextures[5]);
+    drawWalls(-2000, 400, -60000, this.cubeTextures[5]);
+    /*for(var z=21400; z<21400 * 4; z-=500){
+        drawWalls(2000, 400, z);
+    }*/
+    camera.position.z = 30000;
 }
 
 function drawForest(initX, initZ){
@@ -313,22 +336,18 @@ function render() {
         if (camera.rotation.y != -3.30) camera.rotation.y = -3.1;
         camera.position.z += 20;
     }
-    updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod +' periodColor: '+ this.periods[presentPeriod]+'camera position: '+camera.position.x+','+camera.position.y+' ,'+camera.position.z+ ' rotation '+camera.rotation.y ); //Affiche les information
+    updateInfo(" Time : <br /> "+tick.toFixed(3)+' presentPeriod : '+presentPeriod +' camera position: '+camera.position.x+', '+camera.position.y+' , '+camera.position.z+ ' rotation '+camera.rotation.y ); //Affiche les information
     //updateInfo(" Time : <br /> "+tick.toFixed(1)+' presentPeriod : '+presentPeriod +' <br />periodColor: '+ this.periods[presentPeriod]); //Affiche les information
     var timer = 0.0001 * Date.now();
-                //camera.position.x += (  camera.position.x ) * .05;
-                //camera.position.y += (  camera.position.y ) * .05;
-                //camera.lookAt( scene.position );
-                for ( var i = 0, il = spheres.length; i < il; i ++ ) {
-                    var sphere = spheres[ i ];
-                    sphere.position.x = 5000 * Math.cos( timer + i );
-                    sphere.position.y = 5000 * Math.sin( timer + i * 1.1 );
-                }
+    //camera.position.x += (  camera.position.x ) * .05;
+    //camera.position.y += (  camera.position.y ) * .05;
+    //camera.lookAt( scene.position );
+    for ( var i = 0, il = spheres.length; i < il; i ++ ) {
+        var sphere = spheres[ i ];
+        sphere.position.x = 5000 * Math.cos( timer + i );
+        sphere.position.y = 5000 * Math.sin( timer + i * 1.1 );
+    }
                 
-
-
-
-
 
     setPeriod();
     animateGround();
@@ -352,11 +371,30 @@ function setAmbientLight(){
     return;
 }
 
+function drawWalls(x,y,z,textureString){
+    if(! textureString) textureString = "./js/textures/lavatile.jpg";
+    //textureString = this.cubeTextures[Math.floor((Math.random() * this.cubeTextures.length) + 0)];
+    var texture =   THREE.ImageUtils.loadTexture( textureString );
+    var wallGeometry = new THREE.BoxGeometry( 500, 500, 500 );
+    var WallMaterial = new THREE.MeshBasicMaterial( { map: texture} );
+    var wall = new THREE.Mesh( wallGeometry, WallMaterial);
+    wall.position.set(x, y, z);
+    wall.rotation.x = - Math.PI / 2;
+    cubes.push(wall);
+    scene.add( wall );
+}
+
 
 function animateGround(){
     wall.rotation.x += 0.009;
     wall.rotation.y += 0.002;
     wall.rotation.z += 0.009;
+
+    for(var i =0 ; i< cubes.length; i++){
+        cubes[i].rotation.x += 0.009;
+        cubes[i].rotation.y += 0.002;
+        cubes[i].rotation.z += 0.009;
+    }
 }
 
 function onWindowsResize(e){
